@@ -1,0 +1,43 @@
+name: test
+on:
+  # push:
+  #  branches:
+  #   - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: write
+  checks: write
+  packages: write
+
+jobs:
+   deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 
+          
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v3.1.11
+      with:
+        versionSpec: '5.11.1'
+              
+    - name: Determine Version
+      id: git_version # step id used as reference for output values
+      uses: gittools/actions/gitversion/execute@v3.1.11       
+      with:
+        useConfigFile: true
+        configFilePath: GitVersion.yml  
+
+    - name: print
+      run: echo '${{ toJson(github) }}'
+
+    - name: create tag
+      uses: ./.github/actions/git
+      with:
+        BUILD_NUMBER:  ${{ env.GitVersion_FullSemVer }}
+        GITHUB_REF:  ${{ github.ref }}
+        GITHUB_EVENT_PUSHER_NAME: ${{ github.actor }}
