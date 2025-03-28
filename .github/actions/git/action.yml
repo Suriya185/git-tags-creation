@@ -1,0 +1,36 @@
+name: Github Tags
+description: 'github tags'
+inputs:
+  BUILD_NUMBER:
+    description: 'The build number'
+    required: true
+    default: ''
+  GITHUB_REF:
+    description: 'The GitHub reference (e.g., branch or tag)'
+    required: true
+  GITHUB_EVENT_PUSHER_NAME:
+    description: 'The GitHub event name'
+    required: true
+    
+runs:
+  using: 'composite'
+  steps:
+    - name: Create tag
+      run: |
+        if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+          git config user.name "$GITHUB_EVENT_PUSHER_NAME"
+          git config user.email "$GITHUB_EVENT_PUSHER_NAME@users.noreply.github.com"
+          if ! git rev-parse -q --verify "refs/tags/$BUILD_NUMBER"; then
+            git tag -a "$BUILD_NUMBER" -m "Incremented to $BUILD_NUMBER"
+            git push origin "$BUILD_NUMBER"
+          else
+            echo "Tag $BUILD_NUMBER already exists. Skipping tag creation."
+          fi
+        else
+          echo "Not on the main branch. Skipping tag creation."
+        fi
+      shell: bash
+      env:
+        BUILD_NUMBER: 'v${{ inputs.BUILD_NUMBER }}'
+        GITHUB_REF: ${{ inputs.GITHUB_REF }}
+        GITHUB_EVENT_PUSHER_NAME: ${{ inputs.GITHUB_EVENT_PUSHER_NAME }}
