@@ -1,0 +1,18 @@
+mode: Mainline
+branches:
+  main:
+    regex: main
+    tag: ''
+    increment: Patch
+    is-source-branch-for: ['feature']
+  feature:
+    tag: useBranchName
+    increment: none
+    regex: .*
+    prevent-increment-of-merged-branch-version: false
+    track-merge-target: false
+    tracks-release-branches: false
+    is-release-branch: false
+ignore:
+  sha: []
+merge-message-formats: {}
